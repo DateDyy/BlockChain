@@ -1,0 +1,153 @@
+//remix
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+/*
+ * BÀI 1: THAO TÁC TRÊN MẢNG DỮ LIỆU
+ */
+contract ArrayExample {
+    // Tạo mảng động (dynamic array) để lưu trữ các số nguyên
+    uint[] public numbers;
+
+    // Hàm thêm phần tử vào mảng
+    function addNumber(uint _number) public {
+        numbers.push(_number);
+    }
+
+    // Hàm lấy phần tử tại một chỉ số cụ thể
+    function getNumber(uint _index) public view returns (uint) {
+        require(_index < numbers.length, "Index out of bounds");
+        return numbers[_index];
+    }
+
+    // Hàm xóa phần tử cuối cùng trong mảng
+    function removeLastNumber() public {
+        require(numbers.length > 0, "Array is empty");
+        numbers.pop();
+    }
+
+    // Hàm trả về tổng số phần tử trong mảng
+    function getLength() public view returns (uint) {
+        return numbers.length;
+    }
+
+    // Hàm xóa một phần tử tại chỉ số nhất định
+    function removeAtIndex(uint _index) public {
+        require(_index < numbers.length, "Index out of bounds");
+        // Di chuyển phần tử cuối cùng vào vị trí cần xóa
+        numbers[_index] = numbers[numbers.length - 1];
+        // Loại bỏ phần tử cuối cùng
+        numbers.pop();
+    }
+}
+
+
+
+/*
+ * BÀI 2: THAO TÁC VỚI MẢNG DỮ LIỆU KIỂU KÝ TỰ
+ */
+contract StringArrayExample {
+    // Mảng động chứa các chuỗi ký tự
+    string[] public strings;
+
+    // Hàm thêm chuỗi vào mảng
+    function addString(string memory _string) public {
+        strings.push(_string);
+    }
+
+    // Hàm lấy chuỗi tại một chỉ số nhất định
+    function getString(uint _index) public view returns (string memory) {
+        require(_index < strings.length, "Index out of bounds");
+        return strings[_index];
+    }
+
+    // Hàm xóa chuỗi cuối cùng trong mảng
+    function removeLastString() public {
+        require(strings.length > 0, "Array is empty");
+        strings.pop();
+    }
+
+    // Hàm trả về số lượng chuỗi trong mảng
+    function getLength() public view returns (uint) {
+        return strings.length;
+    }
+
+    // Hàm xóa chuỗi tại một chỉ số nhất định
+    function removeAtIndex(uint _index) public {
+        require(_index < strings.length, "Index out of bounds");
+        // Di chuyển chuỗi cuối cùng vào vị trí cần xóa
+        strings[_index] = strings[strings.length - 1];
+        // Loại bỏ chuỗi cuối cùng
+        strings.pop();
+    }
+
+    // Hàm trả về toàn bộ chuỗi trong mảng dưới dạng một chuỗi gộp
+    function getAllStrings() public view returns (string memory) {
+        string memory allStrings = "";
+        for (uint i = 0; i < strings.length; i++) {
+            allStrings = string(abi.encodePacked(allStrings, strings[i], " ")); // Thêm 1 khoảng trắng
+        }
+        return allStrings;
+    }
+}
+
+/*
+ * BÀI 3: QUẢN LÝ THÔNG TIN SẢN PHẨM
+ * Yêu cầu:
+ * - Quản lý: mã hàng, tên hàng, số lượng, đơn giá.
+ * - Thao tác: thêm, sửa, xóa, xuất.
+ */
+contract ProductManagement {
+
+    // 1. Định nghĩa cấu trúc cho sản phẩm
+    struct Product {
+        uint id; // mã hàng
+        string name; // tên hàng
+        uint quantity; // số lượng
+        uint price; // đơn giá
+    }
+
+    // 2. Dùng mapping để lưu trữ sản phẩm (mã hàng => thông tin)
+    mapping(uint => Product) public products;
+    // Dùng mảng để lưu lại các mã hàng (giúp cho việc duyệt/đếm)
+    uint[] public productIds;
+
+    // 3. Thao tác THÊM sản phẩm
+    function addProduct(uint _id, string memory _name, uint _quantity, uint _price) public {
+        require(products[_id].id == 0, "Product ID already exists");
+        
+        products[_id] = Product(_id, _name, _quantity, _price);
+        productIds.push(_id);
+    }
+
+    // 4. Thao tác XUẤT (LẤY) thông tin sản phẩm
+    function getProduct(uint _id) public view returns (string memory name, uint quantity, uint price) {
+        require(products[_id].id != 0, "Product not found");
+        
+        Product storage product = products[_id];
+        return (product.name, product.quantity, product.price);
+    }
+
+    // 5. Thao tác SỬA sản phẩm
+    function editProduct(uint _id, uint _newQuantity, uint _newPrice) public {
+        require(products[_id].id != 0, "Product not found");
+        
+        products[_id].quantity = _newQuantity;
+        products[_id].price = _newPrice;
+    }
+
+    // 6. Thao tác XÓA sản phẩm
+    // Lưu ý: Chỉ xóa dữ liệu trong mapping.
+    function deleteProduct(uint _id) public {
+        require(products[_id].id != 0, "Product not found");
+        
+        delete products[_id];
+        // (Việc xóa trong mảng 'productIds' phức tạp hơn và thường bị bỏ qua)
+    }
+
+    // Hàm hỗ trợ để xem có bao nhiêu sản phẩm
+    function getProductCount() public view returns (uint) {
+        return productIds.length;
+    }
+}

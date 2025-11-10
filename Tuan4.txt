@@ -1,0 +1,82 @@
+//Tuan4
+
+//B1. Trong thư mục contracts tạo file ProductManager.sol (pm.sol)
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract ProductManager {
+    // ---- Structs ----
+    struct Product {
+        uint256 productId;
+        string name;
+        uint256 quantity;
+        uint256 price;
+    }
+
+    // ---- State Variables ----
+    uint256 public productCount = 0;
+    mapping(uint256 => Product) public products;
+
+    // ---- Events ----
+    event ProductAdded(uint256 productId, string name, uint256 quantity, uint256 price);
+    event ProductUpdated(uint256 productId, string name, uint256 quantity, uint256 price);
+
+    // ---- Functions ----
+    function addProduct(string memory _name, uint256 _quantity, uint256 _price) public {
+        productCount++;
+        products[productCount] = Product(productCount, _name, _quantity, _price);
+        emit ProductAdded(productCount, _name, _quantity, _price);
+    }
+
+    function updateProduct(uint256 _productId, string memory _name, uint256 _quantity, uint256 _price) public {
+        require(products[_productId].productId != 0, "Product does not exist");
+        products[_productId] = Product(_productId, _name, _quantity, _price);
+        emit ProductUpdated(_productId, _name, _quantity, _price);
+    }
+
+    function getProduct(uint256 _productId) public view returns (Product memory) {
+        require(products[_productId].productId != 0, "Product does not exist");
+        return products[_productId];
+    }
+}
+
+
+
+B3. Viết hàm triển khai smart contract /scripts/deploy.js
+
+
+async function main() {
+ const ProductManager = await ethers.getContractFactory("ProductManager");
+ const productManager = await ProductManager.deploy();
+ await productManager.waitForDeployment();
+// Lay dia chi trien khai SC
+ console.log("ProductManager deployed to:", productManager.target);
+}
+main()
+ .then(() => process.exit(0))
+ .catch((error) => {
+ console.error(error);
+ process.exit(1);
+ });
+
+
+
+
+//Themsanpham
+
+const ProductManager = await ethers.getContractFactory("ProductManager");
+const productManager = await ProductManager.attach("0xf22D3D2A6A318dED57A51869D05E0f615f9952bf");
+await productManager.addProduct("Apple", 100, 15000);
+
+
+
+//capnhat
+
+await productManager.updateProduct(1, "Apple", 120, 15500);
+
+
+//laythontin
+const product = await productManager.getProduct(1);
+console.log("Product:", product);
+

@@ -1,0 +1,22 @@
+//Tuan3
+
+sudo nano hardhat.config.js
+
+//
+
+require("@nomicfoundation/hardhat-toolbox");
+
+/** @type import('hardhat/config').HardhatUserConfig */
+module.exports = {
+  solidity: "0.8.28",
+  networks: {
+    ganache: {
+        url: "http://127.0.0.1:7545", // URL của Ganache
+        accounts: ["PRIVATE_KEY"] // Thay <PRIVATE_KEY> bằng khoá riêng của tài khoản từ Ganache
+    }
+  }
+};
+
+//
+
+

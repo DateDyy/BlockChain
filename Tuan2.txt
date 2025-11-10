@@ -1,0 +1,102 @@
+//Tuan2
+
+
+package main
+
+import (
+	"fmt"
+	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+)
+
+// Cấu trúc bắt buộc của Smart Contract
+type SmartContract struct {
+	contractapi.Contract
+}
+
+// Hàm InitLedger (có thể để trống hoặc thêm dữ liệu mẫu)
+func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
+	// Khởi tạo 1 bản ghi mẫu
+	return s.Add(ctx, "TH1383", "21001234", "Cao Van Lun", "8.5")
+}
+
+// Hàm Add (Thêm mới)
+func (s *SmartContract) Add(ctx contractapi.TransactionContextInterface, moduleID string, studentID string, fullName string, score string) error {
+	key := fmt.Sprintf("%s-%s", moduleID, studentID)
+
+	existingData, err := ctx.GetStub().GetState(key)
+	if err != nil {
+		return fmt.Errorf("lỗi GetState: %s", err.Error())
+	}
+	if existingData != nil {
+		return fmt.Errorf("bản ghi đã tồn tại: %s", key)
+	}
+
+	value := fmt.Sprintf("%s,%s", fullName, score)
+	return ctx.GetStub().PutState(key, []byte(value))
+}
+
+// Hàm Update (Sửa/Cập nhật)
+func (s *SmartContract) Update(ctx contractapi.TransactionContextInterface, moduleID string, studentID string, newFullName string, newScore string) error {
+	key := fmt.Sprintf("%s-%s", moduleID, studentID)
+
+	existingData, err := ctx.GetStub().GetState(key)
+	if err != nil {
+		return fmt.Errorf("lỗi GetState: %s", err.Error())
+	}
+	if existingData == nil {
+		return fmt.Errorf("bản ghi không tồn tại: %s", key)
+	}
+
+	value := fmt.Sprintf("%s,%s", newFullName, newScore)
+	return ctx.GetStub().PutState(key, []byte(value))
+}
+
+// Hàm GetScore (Lấy thông tin)
+func (s *SmartContract) GetScore(ctx contractapi.TransactionContextInterface, moduleID string, studentID string) (string, error) {
+	key := fmt.Sprintf("%s-%s", moduleID, studentID)
+
+	value, err := ctx.GetStub().GetState(key)
+	if err != nil {
+		return "", fmt.Errorf("không thể lấy dữ liệu: %s", err.Error())
+	}
+	if value == nil {
+		return "", fmt.Errorf("key không tồn tại: %s", key)
+	}
+
+	return string(value), nil
+}
+
+// Hàm DeleteScore (Xóa)
+func (s *SmartContract) DeleteScore(ctx contractapi.TransactionContextInterface, moduleID string, studentID string) error {
+	key := fmt.Sprintf("%s-%s", moduleID, studentID)
+
+	existingData, err := ctx.GetStub().GetState(key)
+	if err != nil {
+		return fmt.Errorf("lỗi GetState: %s", err.Error())
+	}
+	if existingData == nil {
+		return fmt.Errorf("key không tồn tại: %s", key)
+	}
+
+	return ctx.GetStub().DelState(key)
+}
+
+// Hàm Main (bắt buộc)
+func main() {
+	chaincode, err := contractapi.NewChaincode(new(SmartContract))
+	if err != nil {
+		fmt.Printf("Lỗi tạo chaincode: %s", err.Error())
+		return
+	}
+
+	if err := chaincode.Start(); err != nil {
+		fmt.Printf("Lỗi khởi động chaincode: %s", err.Error())
+	}
+}
+
+
+
+
+//Hamthem
+
+peer chaincode invoke -o 127.0.0.1:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile /home/ubuntu/fabric-samples/test-network/organizations/ordererOrganizations/example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n mychaincode --peerAddresses localhost:7051 --tlsRootCertFiles /home/ubuntu/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt --peerAddresses localhost:9051 --tlsRootCertFiles /home/ubuntu/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt -c '{"Args":["Add","TH1383","21001234","Cao Van Lun","9.5"]}'
